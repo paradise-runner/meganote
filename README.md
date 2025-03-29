@@ -1,6 +1,6 @@
 # 📝 MegaNote
 
-![MegaNote Logo](./meganote.jpg)
+<img src="meganote.jpg" alt="drawing" width="200"/>
 
 MegaNote is a utility that syncs handwritten notes from your Supernote device, extracts text using advanced LLMs (Large Language Models), and enhances the extracted content with metadata, tags, and links.
 
