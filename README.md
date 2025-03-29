@@ -51,10 +51,10 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
 4. Install required LLM plugins:
    ```
    # Install Gemini plugin for Google's models
-   uv llm install gemini
+   uv run llm install llm-gemini
    
    # Install Ollama plugin for local model access
-   uv llm install llm-ollama
+   uv run llm install llm-ollama
    ```
 
 5. Configure your LLM API access:
