@@ -48,12 +48,7 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
    uv sync
    ```
 
-4. Install LLM command-line tool:
-   ```
-   uv pip install llm
-   ```
-
-5. Install required LLM plugins:
+4. Install required LLM plugins:
    ```
    # Install Gemini plugin for Google's models
    uv llm install gemini
@@ -62,7 +57,7 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
    uv llm install llm-ollama
    ```
 
-6. Configure your LLM API access:
+5. Configure your LLM API access:
 
    **For Gemini API:**
    ```
