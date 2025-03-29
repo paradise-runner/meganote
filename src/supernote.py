@@ -14,11 +14,15 @@ from src.utilities import (
     filter_out_unsynced_files,
 )
 
-SUPERNOTE_IP = "192.168.1.139"
-SUPERNOTE_PORT = 8089
-SUPERNOTE_IP_ADDRESS = f"http://{SUPERNOTE_IP}:{SUPERNOTE_PORT}"
-SUPERNOTE_ROOT = "/Note"
-SUPERNOTE_URL = f"{SUPERNOTE_IP_ADDRESS}{SUPERNOTE_ROOT}"
+# Default values - will be overridden by parameters
+DEFAULT_SUPERNOTE_IP = "192.168.1.139"
+DEFAULT_SUPERNOTE_PORT = 8089
+
+
+def get_supernote_url(ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT):
+    supernote_ip_address = f"http://{ip}:{port}"
+    supernote_root = "/Note"
+    return supernote_ip_address, f"{supernote_ip_address}{supernote_root}"
 
 
 def get_supernote_json(response_text) -> dict:
@@ -51,17 +55,18 @@ def get_supernote_data(url: str) -> dict:
         return {}
 
 
-def walk_folder(folder, notes):
-    folder_data = get_supernote_data(f"{SUPERNOTE_IP_ADDRESS}/{folder['uri']}")
+def walk_folder(folder, notes, ip_address):
+    folder_data = get_supernote_data(f"{ip_address}/{folder['uri']}")
     for obj in folder_data["fileList"]:
         if obj["isDirectory"]:
-            walk_folder(obj, notes)
+            walk_folder(obj, notes, ip_address)
         else:
             notes.append(obj)
 
 
-def walk_supernote() -> list:
-    root_data = get_supernote_data(SUPERNOTE_URL)
+def walk_supernote(ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT) -> list:
+    ip_address, url = get_supernote_url(ip, port)
+    root_data = get_supernote_data(url)
 
     notes = [obj for obj in root_data["fileList"] if not obj["isDirectory"]]
 
@@ -70,7 +75,7 @@ def walk_supernote() -> list:
     # Walk through and each folder recursively and get all the notes
     for folder in folders:
         print(f"Folder: {folder['name']}")
-        walk_folder(folder, notes)
+        walk_folder(folder, notes, ip_address)
 
     return notes
 
@@ -98,7 +103,7 @@ def calculate_sha256(file_path):
     return sha256_hash.hexdigest()
 
 
-def sync_notes_files(notes, data_folder="data") -> list:
+def sync_notes_files(notes, data_folder="data", ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT) -> list:
     # Create the data folder if it doesn't exist
     if not os.path.exists(data_folder):
         os.makedirs(data_folder)
@@ -109,13 +114,16 @@ def sync_notes_files(notes, data_folder="data") -> list:
         shutil.rmtree(tmp_folder)
     os.makedirs(tmp_folder)
 
+    # Get the Supernote URL with the provided IP and port
+    _, url = get_supernote_url(ip, port)
+
     # Keep track of files that were downloaded
     downloaded_files = []
 
     # persist the notes from the supernote to the temp folder
     for note in notes:
         # remove the '/Note' from the uri
-        note_uri = note["uri"].replace(SUPERNOTE_ROOT, "")
+        note_uri = note["uri"].replace("/Note", "")
         tmp_note_path = f"{tmp_folder}{note_uri}"
         final_note_path = f"{data_folder}{note_uri}"
 
@@ -123,7 +131,7 @@ def sync_notes_files(notes, data_folder="data") -> list:
         os.makedirs(os.path.dirname(tmp_note_path), exist_ok=True)
 
         # download the note to temp folder
-        download_file(f"{SUPERNOTE_URL}{note_uri}", tmp_note_path)
+        download_file(f"{url}{note_uri}", tmp_note_path)
         downloaded_files.append((tmp_note_path, final_note_path))
 
     synced_files = []
@@ -192,12 +200,12 @@ def convert_notes_to_png(input_folder="data", output_folder="images", synced_fil
         convert_to_png(args, notebook, palette=None)
 
 
-def refresh_local_from_supernote(data_folder="data", images_folder="images") -> list:
+def refresh_local_from_supernote(data_folder="data", images_folder="images", ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT) -> list:
     # find out what exists on the supernote
-    notes_data = walk_supernote()
+    notes_data = walk_supernote(ip=ip, port=port)
 
     # sync the notes to the data folder
-    synced_files = sync_notes_files(notes_data, data_folder=data_folder)
+    synced_files = sync_notes_files(notes_data, data_folder=data_folder, ip=ip, port=port)
 
     # convert the notes to pngs for ingesting
     convert_notes_to_png(

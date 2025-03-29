@@ -1,6 +1,8 @@
 import argparse
 from src.supernote import (
     refresh_local_from_supernote,
+    DEFAULT_SUPERNOTE_IP,
+    DEFAULT_SUPERNOTE_PORT,
 )
 from src.text_extraction import (
     test_llm_image_eval,
@@ -16,9 +18,14 @@ def process_synced_files_from_supernote(
     images_folder="images",
     image_llm_model="gemini-2.5-pro-exp-03-25",
     metadata_model="qwen2.5:3b",
+    supernote_ip=DEFAULT_SUPERNOTE_IP,
+    supernote_port=DEFAULT_SUPERNOTE_PORT,
 ) -> list:
     synced_files = refresh_local_from_supernote(
-        data_folder=data_folder, images_folder=images_folder
+        data_folder=data_folder, 
+        images_folder=images_folder,
+        ip=supernote_ip,
+        port=supernote_port
     )
 
     extract_text_from_images(
@@ -46,13 +53,14 @@ def cli():
     )
     parser.add_argument(
         "--operation",
-        choices=["extract", "test-img", "metadata", "sync"],
+        choices=["extract", "test-img", "metadata", "sync", "pull"],
         default="",
         help="""Operation to perform on either one, synced files (new/updated notes) or all files. 
         \"extract\" will extract text from images,
         \"test-img\" will test the LLM image evaluation,
         \"metadata\" will generate metadata for the synced files, 
-        \"sync\" will sync the files from the supernote and generate metadata for all files.""",
+        \"sync\" will sync the files from the supernote and generate metadata for all files,
+        \"pull\" will pull the files from the supernote.""",
     )
     parser.add_argument(
         "--file",
@@ -72,11 +80,29 @@ def cli():
         default="qwen2.5:3b",
         help="LLM model for metadata generation",
     )
+    parser.add_argument(
+        "--supernote-ip",
+        type=str,
+        default=DEFAULT_SUPERNOTE_IP,
+        help=f"IP address of the Supernote device (default: {DEFAULT_SUPERNOTE_IP})"
+    )
+    parser.add_argument(
+        "--supernote-port",
+        type=int,
+        default=DEFAULT_SUPERNOTE_PORT,
+        help=f"Port number for the Supernote device (default: {DEFAULT_SUPERNOTE_PORT})"
+    )
     args = parser.parse_args()
 
     if args.fresh_data:
+        if args.operation in ["sync", "pull"]:
+            print("Syncing happens automatically on either sync or pull, no need to use --fresh-data.")
+        else:
         # walk the supernote device and get all the notes
-        synced_files = refresh_local_from_supernote()
+            synced_files = refresh_local_from_supernote(
+                ip=args.supernote_ip, 
+                port=args.supernote_port
+            )
     else:
         # use the local data folder
         synced_files = []
@@ -119,7 +145,21 @@ def cli():
             images_folder="images",
             image_llm_model=args.image_llm_model,
             metadata_model=args.metadata_model,
+            supernote_ip=args.supernote_ip,
+            supernote_port=args.supernote_port,
         )
+    elif args.operation == "pull":
+        # pull the files from the supernote
+        synced_files = refresh_local_from_supernote(
+            data_folder="data",
+            images_folder="images",
+            ip=args.supernote_ip,
+            port=args.supernote_port,
+        )
+        print(f"Pulled {len(synced_files)} files from the Supernote.")
+    else:
+        print(f"Unknown operation: {args.operation}")
+        raise ValueError(f"Unknown operation: {args.operation}")
 
 
 if __name__ == "__main__":

@@ -66,11 +66,6 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
    ollama pull gemma3:latest
    ```
 
-7. Configure your Supernote device's IP address:
-   - Open `src/supernote.py`
-   - Update the `SUPERNOTE_IP` variable with your Supernote's IP address
-   - Make sure your Supernote's HTTP server is enabled and running on port 8089
-
 ## 🔍 Usage
 
 ### Basic Usage
@@ -78,25 +73,41 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
 To sync new notes from your Supernote, extract text, and generate metadata:
 
 ```
-uv run main.py --fresh-data
+uv run main.py --operation sync --supernote-ip 192.168.1.139 --supernote-port 8089
 ```
 
 ### 🛠️ Command-Line Options
 
 The tool offers several command-line options for different operations:
 
-- `--fresh-data`: Fetch fresh data directly from your Supernote device
 - `--operation`: Specify the operation to perform:
-  - `extract`: Extract text from images (default)
-  - `test-img`: Test LLM image evaluation
+  - `sync`: Sync files from Supernote, extract text, and generate metadata
+  - `pull`: Only sync files from the Supernote (no processing)
+  - `extract`: Extract text from images
   - `metadata`: Generate metadata for synced files
+  - `test-img`: Test LLM image evaluation
+- `--fresh-data`: Fetch fresh data directly from your Supernote device (legacy option)
 - `--file`: Specify a single file to process (useful for testing)
+- `--supernote-ip`: Specify your Supernote's IP address (default: 192.168.1.139)
+- `--supernote-port`: Specify your Supernote's port number (default: 8089)
+- `--image-llm-model`: Specify the LLM model for text extraction (default: gemini-2.5-pro-exp-03-25)
+- `--metadata-model`: Specify the LLM model for metadata generation (default: qwen2.5:3b)
 
 ### 📋 Common Usage Examples
 
-**Sync new notes and extract text:**
+**Sync new notes, extract text, and generate metadata:**
 ```
-uv run main.py --fresh-data
+uv run main.py --operation sync
+```
+
+**Sync notes from a specific Supernote IP address:**
+```
+uv run main.py --operation sync --supernote-ip 192.168.0.123
+```
+
+**Only pull files from the Supernote (without processing):**
+```
+uv run main.py --operation pull
 ```
 
 **Generate metadata for existing notes:**
@@ -104,14 +115,14 @@ uv run main.py --fresh-data
 uv run main.py --operation metadata
 ```
 
-**Test LLM image evaluation with a specific file:**
-```
-uv run main.py --operation test --file my_note.png
-```
-
 **Extract text from existing local data (no fresh sync):**
 ```
-uv run main.py
+uv run main.py --operation extract
+```
+
+**Test LLM image evaluation with a specific file:**
+```
+uv run main.py --operation test-img --file my_note.png
 ```
 
 Output files will be stored in the following directories:
