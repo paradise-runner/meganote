@@ -20,7 +20,7 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
 - Hardware and Software Requirements
    - Supernote device (A5X, A6X, A6X Pro, or A6X Pro 2)
    - A minimum of M1 Mac, or a Windows/Linux computer with a GPU with at least 8GB of VRAM
-- `uv` (Ultraviolet) package manager`
+- `uv` (Ultraviolet) package manager
 - LLM API access (Google Gemini API key and/or Ollama)
 - Network connectivity between your computer and Supernote
 
