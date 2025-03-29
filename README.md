@@ -1,23 +1,23 @@
-# MegaNote
+# 📝 MegaNote
 
 MegaNote is a utility that syncs handwritten notes from your Supernote device, extracts text using advanced LLMs (Large Language Models), and enhances the extracted content with metadata, tags, and links.
 
-## Features
+## ✨ Features
 
-- **Sync from Supernote**: Automatically sync your .note files from a Supernote device over WiFi
-- **Text Extraction**: Convert handwritten notes to text using state-of-the-art LLMs
-- **Metadata Enhancement**: Automatically generate tags and keywords for your notes
-- **Bidirectional Links**: Create a network of interconnected notes with [[wiki-style links]]
-- **Command-line Interface**: Simple command-line tools for automation and control
+- **🔄 Sync from Supernote**: Automatically sync your .note files from a Supernote device over WiFi
+- **📊 Text Extraction**: Convert handwritten notes to text using state-of-the-art LLMs
+- **🏷️ Metadata Enhancement**: Automatically generate tags and keywords for your notes
+- **🔗 Bidirectional Links**: Create a network of interconnected notes with [[wiki-style links]]
+- **💻 Command-line Interface**: Simple command-line tools for automation and control
 
-## Requirements
+## 🧰 Requirements
 
 - Python 3.9 or higher
 - Supernote device accessible on your local network
 - LLM API access (Google Gemini API key and/or Ollama)
 - Network connectivity between your computer and Supernote
 
-## Installation
+## 🚀 Installation
 
 1. Clone this repository:
    ```
@@ -71,7 +71,7 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
    - Update the `SUPERNOTE_IP` variable with your Supernote's IP address
    - Make sure your Supernote's HTTP server is enabled and running on port 8089
 
-## Usage
+## 🔍 Usage
 
 ### Basic Usage
 
@@ -81,18 +81,18 @@ To sync new notes from your Supernote, extract text, and generate metadata:
 uv run main.py --fresh-data
 ```
 
-### Command-Line Options
+### 🛠️ Command-Line Options
 
 The tool offers several command-line options for different operations:
 
 - `--fresh-data`: Fetch fresh data directly from your Supernote device
 - `--operation`: Specify the operation to perform:
   - `extract`: Extract text from images (default)
-  - `test`: Test LLM image evaluation
+  - `test-img`: Test LLM image evaluation
   - `metadata`: Generate metadata for synced files
 - `--file`: Specify a single file to process (useful for testing)
 
-### Common Usage Examples
+### 📋 Common Usage Examples
 
 **Sync new notes and extract text:**
 ```
@@ -115,7 +115,7 @@ uv run main.py
 ```
 
 Output files will be stored in the following directories:
-- Raw files from Supernote: `data/`
-- Extracted images: `images/`
-- Processed text notes: `notes/`
+- 📂 Raw files from Supernote: `data/`
+- 🖼️ Extracted images: `images/`
+- 📄 Processed text notes: `notes/`
 
