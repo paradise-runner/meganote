@@ -4,6 +4,7 @@ import json
 import requests
 import hashlib
 import shutil
+import concurrent.futures
 from pathlib import Path
 
 from supernotelib.cmds.supernote_tool import convert_to_png
@@ -166,25 +167,9 @@ def sync_notes_files(notes, data_folder="data", ip=DEFAULT_SUPERNOTE_IP, port=DE
     return synced_files
 
 
-def convert_notes_to_png(input_folder="data", output_folder="images", synced_files=[]):
-    if not synced_files:
-        return
-
-    notes_files = filter_out_unsynced_files(
-        folder=input_folder,
-        synced_files=synced_files,
-    )
-
-    print(f"Found {len(notes_files)} .note files.")
-    # Create an images folder if it doesn't exist
-    if not os.path.exists(output_folder):
-        print(f"Creating output folder: {output_folder}")
-        os.makedirs(output_folder)
-
-    print(f"Converting notes to PNG in {output_folder}...")
-    # use supernotelib to convert the notes to pngs
-    for note_file in notes_files:
-        print(f"Converting {note_file} to png")
+def convert_single_note_to_png(note_file, output_folder):
+    """Convert a single note file to PNG."""
+    try:
         base_name = os.path.splitext(os.path.basename(note_file))[0]
         output_file = os.path.join(output_folder, f"{base_name}.png")
 
@@ -198,6 +183,45 @@ def convert_notes_to_png(input_folder="data", output_folder="images", synced_fil
 
         notebook = load_notebook(args.input, policy=args.policy)
         convert_to_png(args, notebook, palette=None)
+        return f"Successfully converted {note_file} to PNG"
+    except Exception as e:
+        return f"Error converting {note_file}: {str(e)}"
+
+
+def convert_notes_to_png(input_folder="data", output_folder="images", synced_files=[]):
+
+    notes_files = filter_out_unsynced_files(
+        folder=input_folder,
+        synced_files=synced_files,
+    )
+
+    print(f"Found {len(notes_files)} .note files.")
+    # Create an images folder if it doesn't exist
+    if not os.path.exists(output_folder):
+        print(f"Creating output folder: {output_folder}")
+        os.makedirs(output_folder)
+
+    print(f"Converting notes to PNG in {output_folder} using multiple threads...")
+    
+    # Use ThreadPoolExecutor to process conversions in parallel
+    # Set max_workers to a reasonable number based on CPU cores
+    max_workers = min(len(notes_files), os.cpu_count())
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Create a dictionary of futures to file names for status tracking
+        future_to_note = {
+            executor.submit(convert_single_note_to_png, note_file, output_folder): note_file
+            for note_file in notes_files
+        }
+        
+        # Process results as they complete
+        for future in concurrent.futures.as_completed(future_to_note):
+            note_file = future_to_note[future]
+            try:
+                result = future.result()
+                print(result)
+            except Exception as e:
+                print(f"Failed to convert {note_file}: {str(e)}")
 
 
 def refresh_local_from_supernote(data_folder="data", images_folder="images", ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT) -> list:

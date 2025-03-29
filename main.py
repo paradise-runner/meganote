@@ -1,6 +1,7 @@
 import argparse
 from src.supernote import (
     refresh_local_from_supernote,
+    convert_notes_to_png,
     DEFAULT_SUPERNOTE_IP,
     DEFAULT_SUPERNOTE_PORT,
 )
@@ -53,14 +54,15 @@ def cli():
     )
     parser.add_argument(
         "--operation",
-        choices=["extract", "test-img", "metadata", "sync", "pull"],
+        choices=["extract", "test-img", "metadata", "sync", "pull", "note-to-png"],
         default="",
         help="""Operation to perform on either one, synced files (new/updated notes) or all files. 
         \"extract\" will extract text from images,
         \"test-img\" will test the LLM image evaluation,
         \"metadata\" will generate metadata for the synced files, 
         \"sync\" will sync the files from the supernote and generate metadata for all files,
-        \"pull\" will pull the files from the supernote.""",
+        \"pull\" will pull the files from the supernote,
+        \"note-to-png\" will convert notes to PNG format.""",
     )
     parser.add_argument(
         "--file",
@@ -157,6 +159,13 @@ def cli():
             port=args.supernote_port,
         )
         print(f"Pulled {len(synced_files)} files from the Supernote.")
+    elif args.operation == "note-to-png":
+
+        convert_notes_to_png(
+            input_folder="data",
+            output_folder="images",
+            synced_files=synced_files,
+        )
     else:
         print(f"Unknown operation: {args.operation}")
         raise ValueError(f"Unknown operation: {args.operation}")
