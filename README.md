@@ -12,6 +12,9 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
 - **🔗 Bidirectional Links**: Create a network of interconnected notes with [[wiki-style links]]
 - **💻 Command-line Interface**: Simple command-line tools for automation and control
 
+## ⚠️ Warning ⚠️
+- In order for this tool to work, you need to set your Supernote device to allow [access over WiFi](https://support.supernote.com/en_US/Tools-Features/wi-fi-transfer) when you want to sync notes.
+
 ## 🧰 Requirements
 
 - Hardware and Software Requirements
