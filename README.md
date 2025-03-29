@@ -43,12 +43,26 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
    curl -sSf https://install.ultraviolet.rs | sh
    ```
 
-3. Install dependencies using UV:
+3. Install Ollama (if you want to use local models):
+   ```
+   # For MacOS
+   brew install ollama/tap/ollama
+   ```
+   ```
+   # For Linux
+   curl -sSfL https://ollama.com/download.sh | sh
+   ```
+   ```
+   # For Windows
+   # Download the installer from https://ollama.com/download
+   ```
+
+4. Install dependencies using UV:
    ```
    uv sync
    ```
 
-4. Install required LLM plugins:
+5. Install required LLM plugins:
    ```
    # Install Gemini plugin for Google's models
    uv run llm install llm-gemini
@@ -57,12 +71,12 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
    uv run llm install llm-ollama
    ```
 
-5. Configure your LLM API access:
+6. Configure your LLM API access:
 
    **For Gemini API:**
    ```
    # Set your Gemini API key
-   llm keys set gemini
+   uv run llm keys set gemini
    # When prompted, enter your API key from https://aistudio.google.com/
    ```
       - As configured, this tool costs no money to run.
@@ -72,6 +86,8 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
    # Ensure Ollama is installed (https://ollama.com/)
    # Pull models you want to use (defaults below)
    ollama pull qwen2.5:3b
+
+   # optional (not a default)
    ollama pull gemma3:latest
    ```
 
