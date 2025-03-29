@@ -14,10 +14,18 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
 
 ## 🧰 Requirements
 
-- Python 3.9 or higher
-- Supernote device accessible on your local network
+- Hardware and Software Requirements
+   - Supernote device (A5X, A6X, A6X Pro, or A6X Pro 2)
+   - A minimum of M1 Mac, or a Windows/Linux computer with a GPU with at least 8GB of VRAM
+- `uv` (Ultraviolet) package manager`
 - LLM API access (Google Gemini API key and/or Ollama)
 - Network connectivity between your computer and Supernote
+
+
+### Cost 💸 
+- As configured, this tool costs no money to run. 
+   - The Gemini API is free for personal use and configured to guard against rate limits
+   - Ollama models can be run locally on a Mac with M1 or greater CPU
 
 ## 🚀 Installation
 
@@ -57,13 +65,14 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
    ```
    # Set your Gemini API key
    llm keys set gemini
-   # When prompted, enter your API key from https://ai.google.dev/
+   # When prompted, enter your API key from https://aistudio.google.com/
    ```
-
+      - As configured, this tool costs no money to run.
+      
    **For Ollama models:**
    ```
    # Ensure Ollama is installed (https://ollama.com/)
-   # Pull models you want to use
+   # Pull models you want to use (defaults below)
    ollama pull qwen2.5:3b
    ollama pull gemma3:latest
    ```
