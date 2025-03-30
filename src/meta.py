@@ -2,9 +2,12 @@ import os
 import re
 import json
 from typing import Optional
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 
 import llm
 from llm.models import Model
+from tqdm import tqdm
 
 from src.utilities import (
     filter_out_unsynced_files,
@@ -13,6 +16,60 @@ from src.utilities import (
 # TODO: LLM Named Entity Recognition + Management
 # TODO: LLM Action Item Finding + Management
 # TODO: LLM Note/Folder Level Summaries
+
+
+def get_file_tags(file: str) -> list:
+    """
+    Get all tags from the text.
+    """
+
+    with open(file, "r", encoding="utf-8") as f:
+        text = f.read()
+    
+    # Extract the YAML front matter section
+    front_matter_match = re.search(r"---\s*(.*?)\s*---", text, re.DOTALL)
+    if not front_matter_match:
+        return []
+    
+    front_matter = front_matter_match.group(1)
+    
+    # Find all tag entries with proper YAML list format
+    tag_lines = re.findall(r"^\s*-\s*(.*)\s*$", front_matter, re.MULTILINE)
+    
+    # Process each tag, removing potential whitespace
+    tags = []
+    for line in tag_lines:
+        line_tags = [tag.strip() for tag in line.split(",") if tag.strip()]
+        tags.extend(line_tags)
+    
+    return tags
+
+
+def get_folder_tags_multi_threaded(
+    folder: str,
+): 
+    """
+    Get all tags from the text.
+    """
+
+    # list all the files in the folder
+    files = []
+    for root, _, filenames in os.walk(folder):
+        for filename in filenames:
+            if filename.endswith(".txt"):
+                files.append(os.path.join(root, filename))
+
+    with ThreadPoolExecutor() as executor:
+        # Use partial to pass the folder argument to get_file_tags
+        func = partial(get_file_tags)
+        tags_list = list(tqdm(executor.map(func, files), total=len(files)))
+    # flatten the list of tags
+    tags = [tag for sublist in tags_list for tag in sublist]
+    # remove duplicates
+
+    tags = list(set(tags))
+
+    return tags
 
 
 def generate_metadata(
@@ -32,6 +89,13 @@ def generate_metadata(
     )
 
     print(f"Found {len(files)} files to process.")
+
+    all_tags = get_folder_tags_multi_threaded(extracted_data)
+    print(f"Found {len(all_tags)} unique tags in the folder.")
+    # print the tags
+    print("Tags found:")
+    for tag in all_tags:
+        print(f"- {tag}")
 
     for file in files:
         print(f"Generating metadata for {file}...")
@@ -58,7 +122,6 @@ def generate_metadata(
                 text = re.sub(rf"\b{kw}\b", f"[[{kw}]]", text)
 
         if tag_recommendations is None:
-            # print("Tags already exist in the file.")
             final_text = text
         else:
             # Apply tag recommendations
@@ -84,7 +147,7 @@ def generate_metadata(
 
 def call_llm_for_tags_generation(text, metadata_model) -> list:
     response = metadata_model.prompt(
-        f"Given this notebook text, provide a list of tags that serve as a theme category or primary subject with a maximum of 3 tags possible. text: {text}",
+        f"Given this notebook text, provide a list of tags that serve as a theme category or primary subject with a maximum of 3 tags possible. All tags should be one to three hyphenated words. text: {text}",
         schema=llm.schema_dsl("tag,description", multi=True),
     )
     resp_json = json.loads(response.text())
