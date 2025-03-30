@@ -20,7 +20,8 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
 
 - Hardware and Software Requirements
    - Supernote device (A5X, A6X, A6X Pro, or A6X Pro 2)
-   - A minimum of M1 Mac with 16GB of ram, or a Windows/Linux computer with a GPU with at least 16GB of VRAM
+   - A minimum of M1 Mac with 16GB of ram, or a Windows/Linux computer with a GPU with at least 16GB of VRAM for defaults  
+      - Note: You can change gemma3:12b to gemma3:4b in the command line options to use a smaller model that only requires 8GB of VRAM
 - `uv` (Ultraviolet) package manager
 - Network connectivity between your computer and Supernote
 
@@ -91,12 +92,17 @@ The tool offers several command-line options for different operations:
   - `extract`: Extract text from images
   - `metadata`: Generate metadata for synced files
   - `test-img`: Test LLM image evaluation
+  - `watch`: Continuously monitor for Supernote and sync when available
+  - `note-to-png`: Convert .note files to PNG format
 - `--fresh-data`: Fetch fresh data directly from your Supernote device (legacy option)
 - `--file`: Specify a single file to process (useful for testing)
 - `--supernote-ip`: Specify your Supernote's IP address (default: 192.168.1.139)
 - `--supernote-port`: Specify your Supernote's port number (default: 8089)
 - `--image-llm-model`: Specify the LLM model for text extraction (default: gemma3:12b)
 - `--metadata-model`: Specify the LLM model for metadata generation (default: qwen2.5:3b)
+- `--ignore-dirs`: Comma-separated list of directories to ignore (default: "Work")
+- `--delay-hours`: Hours to wait between sync operations in watch mode (default: 1.0)
+- `--check-interval`: Seconds between checking for Supernote availability in watch mode (default: 60)
 
 ### 📋 Common Usage Examples
 
@@ -128,6 +134,16 @@ uv run main.py --operation extract
 **Test LLM image evaluation with a specific file:**
 ```
 uv run main.py --operation test-img --file my_note.png
+```
+
+**Watch for Supernote device and automatically sync:**
+```
+uv run main.py --operation watch --delay-hours 2 --check-interval 120
+```
+
+**Convert .note files to PNG format:**
+```
+uv run main.py --operation note-to-png
 ```
 
 Output files will be stored in the following directories:

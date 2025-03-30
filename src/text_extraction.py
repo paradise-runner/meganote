@@ -225,7 +225,7 @@ def extract_text_from_images(
     requires_rate_limit = False
     if "ollama" not in str(model).lower():
         requires_rate_limit = True
-    
+
     # loop through the files and extract the text from each image
     for file in files:
         print(f"Extracting text from {file} using {image_eval_llm}")
