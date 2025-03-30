@@ -19,6 +19,9 @@ from src.sync import (
 from src.watch import (
     watch_for_supernote,
 )
+from src.obsidian import (
+    sync_to_obsidian,
+)
 
 
 def cli():
@@ -39,6 +42,7 @@ def cli():
             "pull",
             "note-to-png",
             "watch",
+            "obsidian",
         ],
         default="",
         help="""Operation to perform on either one, synced files (new/updated notes) or all files. 
@@ -48,7 +52,8 @@ def cli():
         \"sync\" will sync the files from the supernote and generate metadata for all files,
         \"pull\" will pull the files from the supernote,
         \"note-to-png\" will convert notes to PNG format,
-        \"watch\" will continuously monitor for Supernote and sync when available.""",
+        \"watch\" will continuously monitor for Supernote and sync when available,
+        \"obsidian\" will sync notes to an Obsidian vault, convert .txt files to markdown, and preserve folder structure.""",
     )
 
     parser.add_argument(
@@ -98,6 +103,18 @@ def cli():
         type=int,
         default=60,
         help="Seconds between checking for Supernote availability in watch mode (default: 60)",
+    )
+    parser.add_argument(
+        "--obsidian-path",
+        type=str,
+        default="",
+        help="Path to the Obsidian vault for syncing notes",
+    )
+    parser.add_argument(
+        "--obsidian-folder",
+        type=str,
+        default="Supernote",
+        help="Name of the folder to create in the Obsidian vault for synced notes (default: 'Supernote')",
     )
     args = parser.parse_args()
 
@@ -198,6 +215,18 @@ def cli():
             # Note: This function doesn't currently use ignore_dirs in the implementation
             # but we should be consistent in passing the parameter for future use
         )
+    elif args.operation == "obsidian":
+        if not args.obsidian_path:
+            print("Error: --obsidian-path is required for the obsidian operation")
+            return
+        
+        sync_to_obsidian(
+            notes_folder="notes",
+            obsidian_path=args.obsidian_path,
+            obsidian_folder=args.obsidian_folder,
+            synced_files=synced_files,
+        )
+        print(f"Notes synced to Obsidian vault at {args.obsidian_path}/{args.obsidian_folder}")
     else:
         print(f"Unknown operation: {args.operation}")
         raise ValueError(f"Unknown operation: {args.operation}")

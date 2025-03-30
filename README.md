@@ -11,6 +11,7 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
 - **📊 Text Extraction**: Convert handwritten notes to text using state-of-the-art LLMs
 - **🏷️ Metadata Enhancement**: Automatically generate tags and keywords for your notes
 - **🔗 Bidirectional Links**: Create a network of interconnected notes with [[wiki-style links]]
+- **📝 Obsidian Integration**: Sync your processed notes directly to your Obsidian vault
 - **💻 Command-line Interface**: Simple command-line tools for automation and control
 
 ## ⚠️ Warning ⚠️
@@ -144,6 +145,16 @@ uv run main.py --operation watch --delay-hours 2 --check-interval 120
 **Convert .note files to PNG format:**
 ```
 uv run main.py --operation note-to-png
+```
+
+**Sync notes to an Obsidian vault (converts .txt files to markdown and preserves folder structure):**
+```
+uv run main.py --operation obsidian --obsidian-path /path/to/obsidian/vault
+```
+
+**Sync notes to a custom folder in an Obsidian vault:**
+```
+uv run main.py --operation obsidian --obsidian-path /path/to/obsidian/vault --obsidian-folder "My Supernote Notes"
 ```
 
 Output files will be stored in the following directories:
