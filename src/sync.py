@@ -18,12 +18,14 @@ def process_synced_files_from_supernote(
     metadata_model="qwen2.5:3b",
     supernote_ip=DEFAULT_SUPERNOTE_IP,
     supernote_port=DEFAULT_SUPERNOTE_PORT,
+    ignore_dirs=None,
 ) -> list:
     synced_files = refresh_local_from_supernote(
-        data_folder=data_folder, 
+        data_folder=data_folder,
         images_folder=images_folder,
         ip=supernote_ip,
-        port=supernote_port
+        port=supernote_port,
+        ignore_dirs=ignore_dirs,
     )
 
     extract_text_from_images(
@@ -41,4 +43,3 @@ def process_synced_files_from_supernote(
     )
 
     return synced_files  # Return synced files list to caller
-

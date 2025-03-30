@@ -16,6 +16,24 @@ wheels = [
 ]
 
 [[package]]
+name = "anthropic"
+version = "0.49.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "jiter" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/86/e3/a88c8494ce4d1a88252b9e053607e885f9b14d0a32273d47b727cbee4228/anthropic-0.49.0.tar.gz", hash = "sha256:c09e885b0f674b9119b4f296d8508907f6cff0009bc20d5cf6b35936c40b4398", size = 210016 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/76/74/5d90ad14d55fbe3f9c474fdcb6e34b4bed99e3be8efac98734a5ddce88c1/anthropic-0.49.0-py3-none-any.whl", hash = "sha256:bbc17ad4e7094988d2fa86b87753ded8dce12498f4b85fe5810f208f454a8375", size = 243368 },
+]
+
+[[package]]
 name = "anyio"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -202,6 +220,23 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/04/0b/4506cb2e831cea4b0214d3625430e921faaa05a7fb520458c75a2dbd2152/fusepy-3.0.1.tar.gz", hash = "sha256:72ff783ec2f43de3ab394e3f7457605bf04c8cf288a2f4068b4cde141d4ee6bd", size = 11519 }
 
 [[package]]
+name = "groq"
+version = "0.20.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8f/fc/e5a03586ffad7ae6c7996f388ca321a3bf8b9fa544a36a934ce4b6b44211/groq-0.20.0.tar.gz", hash = "sha256:2a201d41cae768c53d411dabcfea2333e2e138df22d909ed555ece426f1e016f", size = 121936 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/95/37/9b415df5dd1e6a685d3e8fd4e564a5e80f4f87c19d82829ad027fa2bb150/groq-0.20.0-py3-none-any.whl", hash = "sha256:c27b89903eb2b77f94ed95837ff3cadfc8c9e670953b1c5e5e2e855fea54b6c5", size = 124919 },
+]
+
+[[package]]
 name = "h11"
 version = "0.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -236,6 +271,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/b1/df/48c586a5fe32a0f01324ee087459e112ebb7224f646c0b5023f5e79e9956/httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc", size = 141406 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad", size = 73517 },
+]
+
+[[package]]
+name = "httpx-sse"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4c/60/8f4281fa9bbf3c8034fd54c0e7412e66edbab6bc74c4996bd616f8d0406e/httpx-sse-0.4.0.tar.gz", hash = "sha256:1e81a3a3070ce322add1d3529ed42eb5f70817f45ed6ec915ab753f961139721", size = 12624 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e1/9b/a181f281f65d776426002f330c31849b86b31fc9d848db62e16f03ff739f/httpx_sse-0.4.0-py3-none-any.whl", hash = "sha256:f329af6eae57eaa2bdfd962b42524764af68075ea87370a2de920af5341e318f", size = 7819 },
 ]
 
 [[package]]
@@ -405,6 +449,60 @@ wheels = [
 ]
 
 [[package]]
+name = "llm-anthropic"
+version = "0.15.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anthropic" },
+    { name = "llm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/74/f2/05bfd432161a9829443a174f5b95e5cfb8a4d19b7f3c126cf7e43e59ba97/llm_anthropic-0.15.1.tar.gz", hash = "sha256:0bcc4db38a12e75631027d6226493c8f8b09e5d3b4a553b02223f89affcc9d09", size = 14692 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/86/64/46493fcdada0c457b38bb97c8a40f9b1f07980420912908ec3efa121282d/llm_anthropic-0.15.1-py3-none-any.whl", hash = "sha256:1f66507df807fb27e53e73f448b4a22e2285ef0b198e9c4889c3a695dd7f8d34", size = 12588 },
+]
+
+[[package]]
+name = "llm-gemini"
+version = "0.16"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "ijson" },
+    { name = "llm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fe/5f/58bbf28b707351705d375bc12d4980406d1c7261d26e2e98260c8c2a83e7/llm_gemini-0.16.tar.gz", hash = "sha256:48e485e5d6acbac8aa7e1ce9ebffd6c6e7531d5230208ea996ae4dd2a8edf848", size = 13509 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/57/1c/939ac8f97bb6a4b727c043a3d1ab3ced57b43c97e0fd7d07ac18ffeca95d/llm_gemini-0.16-py3-none-any.whl", hash = "sha256:1b36a46daa119158ef36f0f86f64197776bd701be8355b9c6da078232b5d57b7", size = 12583 },
+]
+
+[[package]]
+name = "llm-groq"
+version = "0.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "groq" },
+    { name = "llm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c7/21/084fe8c167edb13faa94a01ae19158f0dc219c4fb0dd5315876b966f2aeb/llm_groq-0.8.tar.gz", hash = "sha256:088f131f50a726bc87bf99d18d4a546c381e0576551c0b46caaaad4ae9d00066", size = 8471 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f3/28/d5b172a5a009a5b5955cd8495f330c293248ab5a6fba229799552e7c38c8/llm_groq-0.8-py3-none-any.whl", hash = "sha256:9921f69d0fde4e5f94d55a16467f2ee36a0d82a94d174579dd2319b555995f8d", size = 8928 },
+]
+
+[[package]]
+name = "llm-mistral"
+version = "0.11.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "httpx-sse" },
+    { name = "llm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7b/64/8c2b032f6d8413e2920fe5bf7d44b769c4e4279e7e89d9e04a2142a27987/llm_mistral-0.11.1.tar.gz", hash = "sha256:5e0805a4d018972787ebb22c954e46dadc6b0801cf6572da032a55e8fa135f11", size = 12721 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e5/b9/b7d7bf5af6690bebd9e250aa167eab9276de7f8d2a4a540322a18eeced94/llm_mistral-0.11.1-py3-none-any.whl", hash = "sha256:61bd44457c8db7256b675ae20952a362d605b5c90085cb1e262268ebddb0114e", size = 11908 },
+]
+
+[[package]]
 name = "llm-ollama"
 version = "0.9.1"
 source = { registry = "https://pypi.org/simple" }
@@ -530,6 +628,10 @@ source = { virtual = "." }
 dependencies = [
     { name = "ijson" },
     { name = "llm" },
+    { name = "llm-anthropic" },
+    { name = "llm-gemini" },
+    { name = "llm-groq" },
+    { name = "llm-mistral" },
     { name = "llm-ollama" },
     { name = "ollama" },
     { name = "requests" },
@@ -541,6 +643,10 @@ dependencies = [
 requires-dist = [
     { name = "ijson", specifier = ">=3.3.0" },
     { name = "llm", specifier = ">=0.23" },
+    { name = "llm-anthropic", specifier = ">=0.15.1" },
+    { name = "llm-gemini", specifier = ">=0.16" },
+    { name = "llm-groq", specifier = ">=0.8" },
+    { name = "llm-mistral", specifier = ">=0.11.1" },
     { name = "llm-ollama", specifier = ">=0.9.1" },
     { name = "ollama", specifier = ">=0.4.7" },
     { name = "requests", specifier = ">=2.32.3" },

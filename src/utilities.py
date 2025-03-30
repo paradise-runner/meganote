@@ -70,6 +70,19 @@ class ConversionArgs:
     policy: str = "strict"
 
 
+def normalize_file_name(file_name):
+    """
+    Normalize the file name by removing the extension and any trailing numbers.
+    """
+    # Remove the extension
+    base_name = os.path.splitext(file_name)[0]
+    # Remove trailing numbers
+    normalized_name = re.sub(r"_[0-9]+$", "", base_name)
+    # Remove the path
+    normalized_name = os.path.basename(normalized_name)
+    return normalized_name
+
+
 def filter_out_unsynced_files(folder, synced_files):
     found_files = []
 
@@ -80,13 +93,11 @@ def filter_out_unsynced_files(folder, synced_files):
 
     if synced_files:
         # Filter the files to only include the synced files regardless of the folder structure or extension (i.e. path/file.txt == other_path/file.png)
-        found_synced_files = [
-            os.path.splitext(os.path.basename(file))[0] for file in synced_files
-        ]
+        found_synced_files = [normalize_file_name(file) for file in synced_files]
         files = [
             file
             for file in found_files
-            if os.path.splitext(os.path.basename(file))[0] in found_synced_files
+            if normalize_file_name(file) in found_synced_files
         ]
     else:
         # If no synced files, return all found files

@@ -31,7 +31,15 @@ def cli():
     )
     parser.add_argument(
         "--operation",
-        choices=["extract", "test-img", "metadata", "sync", "pull", "note-to-png", "watch"],
+        choices=[
+            "extract",
+            "test-img",
+            "metadata",
+            "sync",
+            "pull",
+            "note-to-png",
+            "watch",
+        ],
         default="",
         help="""Operation to perform on either one, synced files (new/updated notes) or all files. 
         \"extract\" will extract text from images,
@@ -42,11 +50,18 @@ def cli():
         \"note-to-png\" will convert notes to PNG format,
         \"watch\" will continuously monitor for Supernote and sync when available.""",
     )
+
     parser.add_argument(
         "--file",
         type=str,
         default="",
         help="File to process (for testing purposes)",
+    )
+    parser.add_argument(
+        "--ignore-dirs",
+        type=str,
+        default="Work",
+        help="Comma-separated list of directories to ignore during operations (e.g. 'Work')",
     )
     parser.add_argument(
         "--image-llm-model",
@@ -64,36 +79,38 @@ def cli():
         "--supernote-ip",
         type=str,
         default=DEFAULT_SUPERNOTE_IP,
-        help=f"IP address of the Supernote device (default: {DEFAULT_SUPERNOTE_IP})"
+        help=f"IP address of the Supernote device (default: {DEFAULT_SUPERNOTE_IP})",
     )
     parser.add_argument(
         "--supernote-port",
         type=int,
         default=DEFAULT_SUPERNOTE_PORT,
-        help=f"Port number for the Supernote device (default: {DEFAULT_SUPERNOTE_PORT})"
+        help=f"Port number for the Supernote device (default: {DEFAULT_SUPERNOTE_PORT})",
     )
     parser.add_argument(
         "--delay-hours",
         type=float,
         default=1.0,
-        help="Hours to wait between sync operations in watch mode (default: 1.0)"
+        help="Hours to wait between sync operations in watch mode (default: 1.0)",
     )
     parser.add_argument(
         "--check-interval",
         type=int,
         default=60,
-        help="Seconds between checking for Supernote availability in watch mode (default: 60)"
+        help="Seconds between checking for Supernote availability in watch mode (default: 60)",
     )
     args = parser.parse_args()
 
     if args.fresh_data:
         if args.operation in ["sync", "pull"]:
-            print("Syncing happens automatically on either sync or pull, no need to use --fresh-data.")
+            print(
+                "Syncing happens automatically on either sync or pull, no need to use --fresh-data."
+            )
         else:
-        # walk the supernote device and get all the notes
+            # walk the supernote device and get all the notes
+            ignore_dirs = args.ignore_dirs.split(",") if args.ignore_dirs else None
             synced_files = refresh_local_from_supernote(
-                ip=args.supernote_ip, 
-                port=args.supernote_port
+                ip=args.supernote_ip, port=args.supernote_port, ignore_dirs=ignore_dirs
             )
     else:
         # use the local data folder
@@ -107,12 +124,12 @@ def cli():
         return
 
     if args.operation == "test-img":
-        # test the llm image evaluation
+        # test the llm image evaluation across a set of llms
         test_llm_image_eval(
             test_text_file="test_text_file.txt",
             eval_folder="llm_roundtable",
             fresh_sn_data_fetch=args.fresh_data,
-            fresh_llm_data_fetch=args.fresh_data,
+            fresh_llm_data_fetch=True,
             debug=True,
         )
     elif args.operation == "metadata":
@@ -132,6 +149,7 @@ def cli():
             synced_files=synced_files,
         )
     elif args.operation == "sync":
+        ignore_dirs = args.ignore_dirs.split(",") if args.ignore_dirs else None
         process_synced_files_from_supernote(
             data_folder="data",
             images_folder="images",
@@ -139,19 +157,27 @@ def cli():
             metadata_model=args.metadata_model,
             supernote_ip=args.supernote_ip,
             supernote_port=args.supernote_port,
+            ignore_dirs=ignore_dirs,
         )
     elif args.operation == "pull":
         # pull the files from the supernote
+        ignore_dirs = args.ignore_dirs.split(",") if args.ignore_dirs else None
         synced_files = refresh_local_from_supernote(
             data_folder="data",
             images_folder="images",
             ip=args.supernote_ip,
             port=args.supernote_port,
+            ignore_dirs=ignore_dirs,
         )
         print(f"Pulled {len(synced_files)} files from the Supernote.")
     elif args.operation == "watch":
-        print(f"Starting watch service for Supernote at {args.supernote_ip}:{args.supernote_port}")
-        print(f"Sync delay set to {args.delay_hours} hours, check interval {args.check_interval} seconds")
+        ignore_dirs = args.ignore_dirs.split(",") if args.ignore_dirs else None
+        print(
+            f"Starting watch service for Supernote at {args.supernote_ip}:{args.supernote_port}"
+        )
+        print(
+            f"Sync delay set to {args.delay_hours} hours, check interval {args.check_interval} seconds"
+        )
         watch_for_supernote(
             data_folder="data",
             images_folder="images",
@@ -161,13 +187,16 @@ def cli():
             supernote_port=args.supernote_port,
             delay_hours=args.delay_hours,
             check_interval=args.check_interval,
+            ignore_dirs=ignore_dirs,
         )
     elif args.operation == "note-to-png":
-
+        ignore_dirs = args.ignore_dirs.split(",") if args.ignore_dirs else None
         convert_notes_to_png(
             input_folder="data",
             output_folder="images",
             synced_files=synced_files,
+            # Note: This function doesn't currently use ignore_dirs in the implementation
+            # but we should be consistent in passing the parameter for future use
         )
     else:
         print(f"Unknown operation: {args.operation}")

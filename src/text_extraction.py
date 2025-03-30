@@ -3,7 +3,7 @@ import os
 import time
 
 import llm
-from llm.models import Attachment
+from llm.models import Attachment, Model
 
 from src.supernote import (
     refresh_local_from_supernote,
@@ -27,8 +27,6 @@ def round_robbin_image_eval_llms(
     The models are run in a round-robbin fashion, so that each model gets a chance to process the image.
     The results are saved to a file in the output_folder.
 
-    CURRENT TEST RESULTS:
-    TBD
     """
     # get a list of all the .png files in the images folder
     print(f"Searching for .png files in the {images_folder} folder...")
@@ -42,20 +40,18 @@ def round_robbin_image_eval_llms(
     for model in llm_models:
         print(f"Extracting text from {test_image} using {model.model_id}")
         # extract the text from the image using the llm
-        response = call_llm_for_extraction(
+        text = call_llm_for_extraction(
             model,
             images_folder=images_folder,
             notebook_page_img=test_image,
         )
 
+        text = clean_text(
+            text
+        )  # clean up the text, make everything lowercase, and remove any extra spaces, new lines, or tabs
         output_file = f"{output_folder}/{model.model_id}.txt"
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         with open(output_file, "w") as file:
-            # update the text to clean it up and remove any first line garbage
-            text = response.text()
-            # clean up the text, make everything lowercase, and remove any extra spaces, new lines, or tabs
-            text = clean_text(text)
-
             file.write(text)
 
 
@@ -71,9 +67,6 @@ def validate_llm_image_eval(
     The results are saved to a file in the eval_folder.
     The test_text_file.txt file is used to compare the results of each model.
     The test_text_file.txt file is the expected output of the the text extraction.
-
-    CURRENT TEST RESULTS:
-    TBD
 
     image_eval_llms: list of llm model ids to test
     test_text_file: path to the file containing expected output
@@ -120,8 +113,20 @@ def validate_llm_image_eval(
         print(f"✅ Model: {model} had a 100% similarity to the expected text.")
 
     for model in failed_models:
+        diff_percentage = model["% diff"]
+        if diff_percentage < 80:
+            emoji = "❌"  # Red X for very poor similarity (< 80%)
+        elif diff_percentage < 90:
+            emoji = "⚠️"  # Warning for poor similarity (80-90%)
+        elif diff_percentage < 95:
+            emoji = "⚡"  # Lightning for ok similarity (90-95%)
+        elif diff_percentage < 98:
+            emoji = "⭐"  # Star for good similarity (95-98%)
+        else:
+            emoji = "🔍"  # Magnifying glass for very close similarity (98-100%)
+
         print(
-            f"❌ Model: {model['model']} had a {model['% diff']:.2f}% similarity to the expected text."
+            f"{emoji} Model: {model['model']} had a {diff_percentage:.2f}% similarity to the expected text."
         )
 
 
@@ -140,8 +145,9 @@ def test_llm_image_eval(
         refresh_local_from_supernote()
 
     image_eval_llms = [
+        # "llama3.2-vision:latest",
+        # "gemma3:12b",
         "gemma3:latest",
-        "gemma3:12b",
     ]
 
     if fresh_llm_data_fetch:
@@ -159,10 +165,10 @@ def test_llm_image_eval(
 
 
 def call_llm_for_extraction(
-    model,
+    model: Model,
     images_folder="test_images",
     notebook_page_img="test_image.png",
-):
+) -> str:
     """
     This function is used to call the llm for image evaluation.
     It will extract the text from the image and return the response.
@@ -170,10 +176,6 @@ def call_llm_for_extraction(
     The images_folder is the folder where the images are stored.
     The notebook_page_img is the image to extract text from.
 
-    # TODO: Implement 2nd pass for score improvement
-    # 2nd pass ideas:
-    # - use the output of the first pass to improve the second pass (includes text and image)
-    # - feed text only to the llm and see if it can improve the text
     """
     response = model.prompt(
         "extract text from the image",
@@ -218,46 +220,58 @@ def extract_text_from_images(
             # add the file to the folder
             data_structure[relative_path].append(file)
 
+    model = llm.get_model(image_eval_llm)
+
+    requires_rate_limit = False
+    if "ollama" not in str(model).lower():
+        requires_rate_limit = True
+    
     # loop through the files and extract the text from each image
-    for i, file in enumerate(files):
-        # add a 20 second delay between each image to avoid rate limiting
-        if i != 0:
-            time.sleep(20)
+    for file in files:
+        print(f"Extracting text from {file} using {image_eval_llm}")
 
-        # get the relative path of the file
-        relative_path = os.path.relpath(file, images_folder)
-        # get the expected path from the data structure
-        # loop though the data structure to find the file
-
+        # add a 30 second delay between each image to avoid rate limiting
+        if requires_rate_limit:
+            time.sleep(30)
         # replace the .png with .note and remove the number after the last _
         expected_file_note_name = re.sub(r"_[0-9]+\.png$", ".note", file)
+        # remove the images folder from the path
+        expected_file_note_name = os.path.basename(expected_file_note_name)
+        data_file_path = None
         for ds_path, ds_files in data_structure.items():
             if expected_file_note_name in ds_files:
-                # get the path of the file
-                data_file_path = os.path.join(data_folder, ds_path, file)
+                data_file_path = os.path.join(
+                    data_folder, ds_path, expected_file_note_name
+                )
                 break
-        else:
-            print(f"File {file} not found in data folder.")
-            raise ValueError(f"File {file} not found in data folder.")
-        # get the output file path and remove the .png extension
+        if data_file_path is None:
+            raise ValueError(f"File {file} not found in {images_folder} folder.")
+
+        file_name = os.path.basename(file)
         # remove the .png extension from the file name
-        output_file = os.path.join(output_folder, ds_path, f"{file[:-4]}.txt")
+        output_file = os.path.join(output_folder, ds_path, f"{file_name[:-4]}.txt")
         # create the output folder if it doesn't exist
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
-        # extract the text from the image using the llm
-        print(f"Extracting text from {file} using {image_eval_llm}")
-        model = llm.get_model(image_eval_llm)
-        response = call_llm_for_extraction(
-            model,
-            images_folder=images_folder,
-            notebook_page_img=file,
-        )
+        try:
+            response = call_llm_for_extraction(
+                model,
+                images_folder=images_folder,
+                notebook_page_img=file_name,
+            )
+        except Exception as e:
+            print(f"Error extracting text from {file_name}: {e}")
+            time.sleep(45)
+            response = call_llm_for_extraction(
+                model,
+                images_folder=images_folder,
+                notebook_page_img=file_name,
+            )
 
         # save the response to a file
         with open(output_file, "w") as _file:
             # update the text to clean it up and remove any first line garbage
-            text = response.text()
+            text = response
 
             # clean up the text, make everything lowercase, and remove any extra spaces, new lines, or tabs
             text = clean_text(text, newline_replacement=False)

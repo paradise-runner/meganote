@@ -5,7 +5,6 @@ import requests
 import hashlib
 import shutil
 import concurrent.futures
-from pathlib import Path
 
 from supernotelib.cmds.supernote_tool import convert_to_png
 from supernotelib.parser import load_notebook
@@ -56,27 +55,37 @@ def get_supernote_data(url: str) -> dict:
         return {}
 
 
-def walk_folder(folder, notes, ip_address):
+def walk_folder(folder, notes, ip_address, ignore_dirs=None):
     folder_data = get_supernote_data(f"{ip_address}/{folder['uri']}")
     for obj in folder_data["fileList"]:
         if obj["isDirectory"]:
-            walk_folder(obj, notes, ip_address)
+            # Skip this directory if it's in the ignore list
+            if ignore_dirs and obj["name"] in ignore_dirs:
+                print(f"Ignoring directory: {obj['name']}")
+                continue
+            walk_folder(obj, notes, ip_address, ignore_dirs)
         else:
             notes.append(obj)
 
 
-def walk_supernote(ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT) -> list:
+def walk_supernote(
+    ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT, ignore_dirs=None
+) -> list:
     ip_address, url = get_supernote_url(ip, port)
     root_data = get_supernote_data(url)
 
     notes = [obj for obj in root_data["fileList"] if not obj["isDirectory"]]
 
-    folders = [obj for obj in root_data["fileList"] if obj["isDirectory"]]
+    folders = [
+        obj
+        for obj in root_data["fileList"]
+        if obj["isDirectory"] and (not ignore_dirs or obj["name"] not in ignore_dirs)
+    ]
 
     # Walk through and each folder recursively and get all the notes
     for folder in folders:
         print(f"Folder: {folder['name']}")
-        walk_folder(folder, notes, ip_address)
+        walk_folder(folder, notes, ip_address, ignore_dirs)
 
     return notes
 
@@ -104,7 +113,9 @@ def calculate_sha256(file_path):
     return sha256_hash.hexdigest()
 
 
-def sync_notes_files(notes, data_folder="data", ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT) -> list:
+def sync_notes_files(
+    notes, data_folder="data", ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT
+) -> list:
     # Create the data folder if it doesn't exist
     if not os.path.exists(data_folder):
         os.makedirs(data_folder)
@@ -189,31 +200,29 @@ def convert_single_note_to_png(note_file, output_folder):
 
 
 def convert_notes_to_png(input_folder="data", output_folder="images", synced_files=[]):
-
     notes_files = filter_out_unsynced_files(
         folder=input_folder,
         synced_files=synced_files,
     )
 
-    print(f"Found {len(notes_files)} .note files.")
     # Create an images folder if it doesn't exist
     if not os.path.exists(output_folder):
         print(f"Creating output folder: {output_folder}")
         os.makedirs(output_folder)
 
-    print(f"Converting notes to PNG in {output_folder} using multiple threads...")
-    
     # Use ThreadPoolExecutor to process conversions in parallel
     # Set max_workers to a reasonable number based on CPU cores
     max_workers = min(len(notes_files), os.cpu_count())
-    
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Create a dictionary of futures to file names for status tracking
         future_to_note = {
-            executor.submit(convert_single_note_to_png, note_file, output_folder): note_file
+            executor.submit(
+                convert_single_note_to_png, note_file, output_folder
+            ): note_file
             for note_file in notes_files
         }
-        
+
         # Process results as they complete
         for future in concurrent.futures.as_completed(future_to_note):
             note_file = future_to_note[future]
@@ -224,12 +233,20 @@ def convert_notes_to_png(input_folder="data", output_folder="images", synced_fil
                 print(f"Failed to convert {note_file}: {str(e)}")
 
 
-def refresh_local_from_supernote(data_folder="data", images_folder="images", ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT) -> list:
+def refresh_local_from_supernote(
+    data_folder="data",
+    images_folder="images",
+    ip=DEFAULT_SUPERNOTE_IP,
+    port=DEFAULT_SUPERNOTE_PORT,
+    ignore_dirs=None,
+) -> list:
     # find out what exists on the supernote
-    notes_data = walk_supernote(ip=ip, port=port)
+    notes_data = walk_supernote(ip=ip, port=port, ignore_dirs=ignore_dirs)
 
     # sync the notes to the data folder
-    synced_files = sync_notes_files(notes_data, data_folder=data_folder, ip=ip, port=port)
+    synced_files = sync_notes_files(
+        notes_data, data_folder=data_folder, ip=ip, port=port
+    )
 
     # convert the notes to pngs for ingesting
     convert_notes_to_png(

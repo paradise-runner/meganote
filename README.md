@@ -33,7 +33,7 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/meganote.git
+   git clone https://github.com/paradise-runner/meganote.git
    cd meganote
    ```
 
@@ -135,3 +135,26 @@ Output files will be stored in the following directories:
 - 🖼️ Extracted images: `images/`
 - 📄 Processed text notes: `notes/`
 
+## Open Source AI Model Ranking at Text Extraction
+### Prompt: `extract text from the image`
+| Model Name | Text Extraction Quality
+|----------|------------|------
+| gemini-2.5-pro-exp-03-25 | 100%
+| gemma3:12b | 94.46%
+| gemma3:4b | 94.02%
+| llama3.2-vision:11b | 4.35%
+
+### Prompt: `extract text from this image into markdown without any extra text or formatting in the response.`
+| Model Name | Text Extraction Quality
+|----------|------------|------
+| gemma3:12b | 94.77%
+| gemma3:4b | 95.98%
+| llama3.2-vision:11b | 92.44%
+
+
+### Prompt: `transcripe the text in the image as accurately as possible into markdown format without any extra text or formatting in the response.`
+| Model Name | Text Extraction Quality
+|----------|------------|------
+| gemma3:12b | 96.49%
+| gemma3:4b | 96.25%
+| llama3.2-vision:11b | 95.40%

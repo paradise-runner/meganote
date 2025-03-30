@@ -10,8 +10,13 @@ import socket
 import time
 import logging
 
+# Create a dedicated logger for this module
+logger = logging.getLogger("meganote.watch")
 
-def is_supernote_available(ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT, timeout=1):
+
+def is_supernote_available(
+    ip=DEFAULT_SUPERNOTE_IP, port=DEFAULT_SUPERNOTE_PORT, timeout=1
+):
     """Check if Supernote is available on the network."""
     try:
         socket.setdefaulttimeout(timeout)
@@ -32,10 +37,11 @@ def watch_for_supernote(
     supernote_port=DEFAULT_SUPERNOTE_PORT,
     delay_hours=1,
     check_interval=60,  # Check every minute
+    ignore_dirs=None,
 ):
     """
     Watch for Supernote device on the network and sync when available.
-    
+
     Args:
         data_folder: Directory to store fetched note data
         images_folder: Directory to store converted images
@@ -45,24 +51,34 @@ def watch_for_supernote(
         supernote_port: Port number for the Supernote device
         delay_hours: Hours to wait between sync operations (to prevent battery drain)
         check_interval: Seconds to wait between availability checks
+        ignore_dirs: List of directories to ignore during sync operations
     """
-    logging.basicConfig(level=logging.INFO, 
-                      format='%(asctime)s - %(levelname)s - %(message)s')
-    
+    # Configure the module's logger
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    logger.setLevel(logging.INFO)
+    # Check if logger already has handlers to avoid duplicates
+    if not logger.handlers:
+        logger.addHandler(handler)
+
     last_sync_time = 0
     delay_seconds = delay_hours * 3600  # Convert hours to seconds
-    
-    logging.info(f"Starting Supernote watcher service")
-    logging.info(f"IP: {supernote_ip}, Port: {supernote_port}, Sync delay: {delay_hours} hours")
-    
+
+    logger.info("Starting Supernote watcher service")
+    logger.info(
+        f"IP: {supernote_ip}, Port: {supernote_port}, Sync delay: {delay_hours} hours"
+    )
+    if ignore_dirs:
+        logger.info(f"Ignoring directories: {', '.join(ignore_dirs)}")
+
     while True:
         current_time = time.time()
-        
+
         # Check if Supernote is available
         if is_supernote_available(supernote_ip, supernote_port):
             # Check if enough time has passed since last sync
             if current_time - last_sync_time > delay_seconds:
-                logging.info("Supernote detected on network. Starting sync process...")
+                logger.info("Supernote detected on network. Starting sync process...")
                 try:
                     synced_files = process_synced_files_from_supernote(
                         data_folder=data_folder,
@@ -71,17 +87,20 @@ def watch_for_supernote(
                         metadata_model=metadata_model,
                         supernote_ip=supernote_ip,
                         supernote_port=supernote_port,
+                        ignore_dirs=ignore_dirs,
                     )
                     if synced_files:
-                        logging.info(f"Successfully synced {len(synced_files)} files.")
+                        logger.info(f"Successfully synced {len(synced_files)} files.")
                     else:
-                        logging.info("Sync completed. No new or updated files found.")
+                        logger.info("Sync completed. No new or updated files found.")
                     last_sync_time = time.time()  # Update last sync time
                 except Exception as e:
-                    logging.error(f"Error during sync process: {e}")
+                    logger.error(f"Error during sync process: {e}")
             else:
-                logging.debug("Supernote available but waiting for delay period to complete.")
+                logger.debug(
+                    "Supernote available but waiting for delay period to complete."
+                )
         else:
-            logging.debug("Supernote not detected on network.")
-            
+            logger.debug("Supernote not detected on network.")
+
         time.sleep(check_interval)
