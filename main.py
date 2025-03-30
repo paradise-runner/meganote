@@ -5,6 +5,7 @@ from src.supernote import (
     DEFAULT_SUPERNOTE_IP,
     DEFAULT_SUPERNOTE_PORT,
 )
+
 from src.text_extraction import (
     test_llm_image_eval,
     extract_text_from_images,
@@ -12,36 +13,12 @@ from src.text_extraction import (
 from src.meta import (
     generate_metadata,
 )
-
-
-def process_synced_files_from_supernote(
-    data_folder="data",
-    images_folder="images",
-    image_llm_model="gemini-2.5-pro-exp-03-25",
-    metadata_model="qwen2.5:3b",
-    supernote_ip=DEFAULT_SUPERNOTE_IP,
-    supernote_port=DEFAULT_SUPERNOTE_PORT,
-) -> list:
-    synced_files = refresh_local_from_supernote(
-        data_folder=data_folder, 
-        images_folder=images_folder,
-        ip=supernote_ip,
-        port=supernote_port
-    )
-
-    extract_text_from_images(
-        images_folder=images_folder,
-        data_folder=data_folder,
-        output_folder="notes",
-        image_eval_llm=image_llm_model,
-        synced_files=synced_files,
-    )
-
-    generate_metadata(
-        extracted_data="notes",
-        metadata_model_id=metadata_model,
-        synced_files=synced_files,
-    )
+from src.sync import (
+    process_synced_files_from_supernote,
+)
+from src.watch import (
+    watch_for_supernote,
+)
 
 
 def cli():
@@ -54,7 +31,7 @@ def cli():
     )
     parser.add_argument(
         "--operation",
-        choices=["extract", "test-img", "metadata", "sync", "pull", "note-to-png"],
+        choices=["extract", "test-img", "metadata", "sync", "pull", "note-to-png", "watch"],
         default="",
         help="""Operation to perform on either one, synced files (new/updated notes) or all files. 
         \"extract\" will extract text from images,
@@ -62,7 +39,8 @@ def cli():
         \"metadata\" will generate metadata for the synced files, 
         \"sync\" will sync the files from the supernote and generate metadata for all files,
         \"pull\" will pull the files from the supernote,
-        \"note-to-png\" will convert notes to PNG format.""",
+        \"note-to-png\" will convert notes to PNG format,
+        \"watch\" will continuously monitor for Supernote and sync when available.""",
     )
     parser.add_argument(
         "--file",
@@ -73,7 +51,7 @@ def cli():
     parser.add_argument(
         "--image-llm-model",
         type=str,
-        default="gemini-2.5-pro-exp-03-25",
+        default="gemma3:12b",
         help="LLM model for text extraction from images",
     )
     parser.add_argument(
@@ -93,6 +71,18 @@ def cli():
         type=int,
         default=DEFAULT_SUPERNOTE_PORT,
         help=f"Port number for the Supernote device (default: {DEFAULT_SUPERNOTE_PORT})"
+    )
+    parser.add_argument(
+        "--delay-hours",
+        type=float,
+        default=1.0,
+        help="Hours to wait between sync operations in watch mode (default: 1.0)"
+    )
+    parser.add_argument(
+        "--check-interval",
+        type=int,
+        default=60,
+        help="Seconds between checking for Supernote availability in watch mode (default: 60)"
     )
     args = parser.parse_args()
 
@@ -159,6 +149,19 @@ def cli():
             port=args.supernote_port,
         )
         print(f"Pulled {len(synced_files)} files from the Supernote.")
+    elif args.operation == "watch":
+        print(f"Starting watch service for Supernote at {args.supernote_ip}:{args.supernote_port}")
+        print(f"Sync delay set to {args.delay_hours} hours, check interval {args.check_interval} seconds")
+        watch_for_supernote(
+            data_folder="data",
+            images_folder="images",
+            image_llm_model=args.image_llm_model,
+            metadata_model=args.metadata_model,
+            supernote_ip=args.supernote_ip,
+            supernote_port=args.supernote_port,
+            delay_hours=args.delay_hours,
+            check_interval=args.check_interval,
+        )
     elif args.operation == "note-to-png":
 
         convert_notes_to_png(

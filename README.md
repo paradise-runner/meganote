@@ -6,6 +6,7 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
 
 ## ✨ Features
 
+- **🧠 Local First AI**: Use your computer to get your work done, no cloud provider in your way. No data privacy concerns.
 - **🔄 Sync from Supernote**: Automatically sync your .note files from a Supernote device over WiFi
 - **📊 Text Extraction**: Convert handwritten notes to text using state-of-the-art LLMs
 - **🏷️ Metadata Enhancement**: Automatically generate tags and keywords for your notes
@@ -19,16 +20,14 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
 
 - Hardware and Software Requirements
    - Supernote device (A5X, A6X, A6X Pro, or A6X Pro 2)
-   - A minimum of M1 Mac, or a Windows/Linux computer with a GPU with at least 8GB of VRAM
+   - A minimum of M1 Mac with 16GB of ram, or a Windows/Linux computer with a GPU with at least 16GB of VRAM
 - `uv` (Ultraviolet) package manager
-- LLM API access (Google Gemini API key and/or Ollama)
 - Network connectivity between your computer and Supernote
 
 
 ### Cost 💸 
 - As configured, this tool costs no money to run. 
-   - The Gemini API is free for personal use and configured to guard against rate limits
-   - Ollama models can be run locally on a Mac with M1 or greater CPU
+   - Ollama models can be run locally on a Mac with M1 with 16GB of RAM
 
 ## 🚀 Installation
 
@@ -62,33 +61,14 @@ MegaNote is a utility that syncs handwritten notes from your Supernote device, e
    uv sync
    ```
 
-5. Install required LLM plugins:
-   ```
-   # Install Gemini plugin for Google's models
-   uv run llm install llm-gemini
-   
-   # Install Ollama plugin for local model access
-   uv run llm install llm-ollama
-   ```
+5. Configure your LLM API access:
 
-6. Configure your LLM API access:
-
-   **For Gemini API:**
-   ```
-   # Set your Gemini API key
-   uv run llm keys set gemini
-   # When prompted, enter your API key from https://aistudio.google.com/
-   ```
-      - As configured, this tool costs no money to run.
-      
    **For Ollama models:**
    ```
    # Ensure Ollama is installed (https://ollama.com/)
    # Pull models you want to use (defaults below)
    ollama pull qwen2.5:3b
-
-   # optional (not a default)
-   ollama pull gemma3:latest
+   ollama pull gemma3:12b
    ```
 
 ## 🔍 Usage
@@ -115,7 +95,7 @@ The tool offers several command-line options for different operations:
 - `--file`: Specify a single file to process (useful for testing)
 - `--supernote-ip`: Specify your Supernote's IP address (default: 192.168.1.139)
 - `--supernote-port`: Specify your Supernote's port number (default: 8089)
-- `--image-llm-model`: Specify the LLM model for text extraction (default: gemini-2.5-pro-exp-03-25)
+- `--image-llm-model`: Specify the LLM model for text extraction (default: gemma3:12b)
 - `--metadata-model`: Specify the LLM model for metadata generation (default: qwen2.5:3b)
 
 ### 📋 Common Usage Examples

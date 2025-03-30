@@ -28,14 +28,7 @@ def round_robbin_image_eval_llms(
     The results are saved to a file in the output_folder.
 
     CURRENT TEST RESULTS:
-    The ranking of the models is as follows:
-    - gemini-2.5-pro-exp-03-25
-    - gemma3:latest
-    - gemini-2.0-flash-exp
-
-    Gemini-2.5-pro-exp-03-25 did a 100% accuracy on the first test image
-    Gemma3 got _close_ but missed a few key words like "Supernote" -> "SuperJey", "Toy" -> "Tay"; etc
-    Gemini-2.0-flash-exp was the worst of the three, and I would not recommend using it for this task.
+    TBD
     """
     # get a list of all the .png files in the images folder
     print(f"Searching for .png files in the {images_folder} folder...")
@@ -80,10 +73,7 @@ def validate_llm_image_eval(
     The test_text_file.txt file is the expected output of the the text extraction.
 
     CURRENT TEST RESULTS:
-    The pass/fail results of the models are as follows:
-    - ✅ Model: gemini-2.5-pro-exp-03-25 had a 100% similarity to the expected text.
-    - ❌ Model: gemma3:latest had a 94.02% similarity to the expected text.
-    - ❌ Model: gemini-2.0-flash-exp had a 92.80% similarity to the expected text.
+    TBD
 
     image_eval_llms: list of llm model ids to test
     test_text_file: path to the file containing expected output
@@ -150,9 +140,8 @@ def test_llm_image_eval(
         refresh_local_from_supernote()
 
     image_eval_llms = [
-        "gemini-2.0-flash-exp",
         "gemma3:latest",
-        "gemini-2.5-pro-exp-03-25",
+        "gemma3:12b",
     ]
 
     if fresh_llm_data_fetch:
@@ -197,7 +186,7 @@ def extract_text_from_images(
     images_folder="images",
     data_folder="data",
     output_folder="notes",
-    image_eval_llm="gemini-2.5-pro-exp-03-25",
+    image_eval_llm="gemma3:12b",
     synced_files=[],
 ):
     """
