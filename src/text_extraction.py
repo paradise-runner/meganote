@@ -3,7 +3,12 @@ import os
 import time
 
 import llm
-from llm.models import Attachment, Model
+from llm.models import Model
+
+from src.llm_utils import (
+    get_llm_model,
+    extract_text_from_image,
+)
 
 from src.supernote import (
     refresh_local_from_supernote,
@@ -177,18 +182,18 @@ def call_llm_for_extraction(
     The notebook_page_img is the image to extract text from.
 
     """
-    response = model.prompt(
-        "extract text from the image",
-        attachments=[Attachment(path=f"{images_folder}/{notebook_page_img}")],
+    image_path = f"{images_folder}/{notebook_page_img}"
+    return extract_text_from_image(
+        model_id=model.model_id,
+        image_path=image_path
     )
-    return response.text()
 
 
 def extract_text_from_images(
     images_folder="images",
     data_folder="data",
     output_folder="notes",
-    image_eval_llm="gemma3:12b",
+    image_eval_llm="gemma3:latest",
     synced_files=[],
 ):
     """
@@ -220,7 +225,7 @@ def extract_text_from_images(
             # add the file to the folder
             data_structure[relative_path].append(file)
 
-    model = llm.get_model(image_eval_llm)
+    model = get_llm_model(image_eval_llm)
 
     requires_rate_limit = False
     if "ollama" not in str(model).lower():
@@ -253,20 +258,10 @@ def extract_text_from_images(
         # create the output folder if it doesn't exist
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
-        try:
-            response = call_llm_for_extraction(
-                model,
-                images_folder=images_folder,
-                notebook_page_img=file_name,
-            )
-        except Exception as e:
-            print(f"Error extracting text from {file_name}: {e}")
-            time.sleep(45)
-            response = call_llm_for_extraction(
-                model,
-                images_folder=images_folder,
-                notebook_page_img=file_name,
-            )
+        response = extract_text_from_image(
+            model_id=image_eval_llm,
+            image_path=f"{images_folder}/{file_name}"
+        )
 
         # save the response to a file
         with open(output_file, "w") as _file:

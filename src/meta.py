@@ -6,6 +6,12 @@ from typing import Optional
 import llm
 from llm.models import Model
 
+from src.llm_utils import (
+    get_llm_model,
+    generate_tags_with_llm,
+    generate_keywords_with_llm,
+)
+
 from src.utilities import (
     filter_out_unsynced_files,
 )
@@ -17,10 +23,10 @@ from src.utilities import (
 
 def generate_metadata(
     extracted_data: str,
-    metadata_model_id: Model,
+    metadata_model_id: str,
     synced_files: list = [],
 ):
-    model = llm.get_model(metadata_model_id)
+    model = get_llm_model(metadata_model_id)
 
     if not os.path.exists(extracted_data):
         raise FileNotFoundError(f"Directory {extracted_data} does not exist.")
@@ -83,12 +89,11 @@ def generate_metadata(
 
 
 def call_llm_for_tags_generation(text, metadata_model) -> list:
-    response = metadata_model.prompt(
-        f"Given this notebook text, provide a list of tags that serve as a theme category or primary subject with a maximum of 3 tags possible. text: {text}",
-        schema=llm.schema_dsl("tag,description", multi=True),
+    return generate_tags_with_llm(
+        model_id=metadata_model.model_id,
+        text=text,
+        max_tags=3
     )
-    resp_json = json.loads(response.text())
-    return [tag["tag"] for tag in resp_json["items"]]
 
 
 # def call_llm_for_keywords_update(text, metadata_model) -> list:
@@ -101,12 +106,11 @@ def call_llm_for_tags_generation(text, metadata_model) -> list:
 
 
 def call_llm_for_keywords_generation(text, metadata_model) -> list:
-    response = metadata_model.prompt(
-        f"Given this notebook text, provide a list of keywords that work as wiki-stle links and are central to the content of the text to link relevant notes together with a maximum of 7 tags possible. text: {text}",
-        schema=llm.schema_dsl("keyword,description", multi=True),
+    return generate_keywords_with_llm(
+        model_id=metadata_model.model_id,
+        text=text,
+        max_keywords=7
     )
-    resp_json = json.loads(response.text())
-    return [kw["keyword"] for kw in resp_json["items"]]
 
 
 def generate_tags(
