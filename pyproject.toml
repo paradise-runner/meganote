@@ -12,6 +12,7 @@ dependencies = [
     "llm-groq>=0.8",
     "llm-mistral>=0.11.1",
     "llm-ollama>=0.9.1",
+    "llm-openrouter>=0.4.1",
     "ollama>=0.4.7",
     "requests>=2.32.3",
     "ruff>=0.11.2",

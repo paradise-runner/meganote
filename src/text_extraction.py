@@ -3,7 +3,6 @@ import os
 import time
 
 import llm
-from llm.models import Model
 
 from src.llm_utils import (
     get_llm_model,
@@ -44,11 +43,8 @@ def round_robbin_image_eval_llms(
 
     for model in llm_models:
         print(f"Extracting text from {test_image} using {model.model_id}")
-        # extract the text from the image using the llm
-        text = call_llm_for_extraction(
-            model,
-            images_folder=images_folder,
-            notebook_page_img=test_image,
+        text = extract_text_from_image(
+            model_id=model.model_id, image_path=f"{images_folder}/{test_image}"
         )
 
         text = clean_text(
@@ -152,7 +148,8 @@ def test_llm_image_eval(
     image_eval_llms = [
         # "llama3.2-vision:latest",
         # "gemma3:12b",
-        "gemma3:latest",
+        "openrouter/qwen/qwen2.5-vl-32b-instruct:free",
+        "openrouter/qwen/qwen2.5-vl-72b-instruct:free",
     ]
 
     if fresh_llm_data_fetch:
@@ -166,26 +163,6 @@ def test_llm_image_eval(
         test_text_file=test_text_file,
         eval_folder=eval_folder,
         debug=debug,
-    )
-
-
-def call_llm_for_extraction(
-    model: Model,
-    images_folder="test_images",
-    notebook_page_img="test_image.png",
-) -> str:
-    """
-    This function is used to call the llm for image evaluation.
-    It will extract the text from the image and return the response.
-    The model is the llm model to use for image evaluation.
-    The images_folder is the folder where the images are stored.
-    The notebook_page_img is the image to extract text from.
-
-    """
-    image_path = f"{images_folder}/{notebook_page_img}"
-    return extract_text_from_image(
-        model_id=model.model_id,
-        image_path=image_path
     )
 
 
@@ -259,8 +236,7 @@ def extract_text_from_images(
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
         response = extract_text_from_image(
-            model_id=image_eval_llm,
-            image_path=f"{images_folder}/{file_name}"
+            model_id=image_eval_llm, image_path=f"{images_folder}/{file_name}"
         )
 
         # save the response to a file

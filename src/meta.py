@@ -1,9 +1,7 @@
 import os
 import re
-import json
 from typing import Optional
 
-import llm
 from llm.models import Model
 
 from src.llm_utils import (
@@ -90,9 +88,7 @@ def generate_metadata(
 
 def call_llm_for_tags_generation(text, metadata_model) -> list:
     return generate_tags_with_llm(
-        model_id=metadata_model.model_id,
-        text=text,
-        max_tags=3
+        model_id=metadata_model.model_id, text=text, max_tags=3
     )
 
 
@@ -107,9 +103,7 @@ def call_llm_for_tags_generation(text, metadata_model) -> list:
 
 def call_llm_for_keywords_generation(text, metadata_model) -> list:
     return generate_keywords_with_llm(
-        model_id=metadata_model.model_id,
-        text=text,
-        max_keywords=7
+        model_id=metadata_model.model_id, text=text, max_keywords=7
     )
 
 

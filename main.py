@@ -145,7 +145,7 @@ def cli():
         test_llm_image_eval(
             test_text_file="test_text_file.txt",
             eval_folder="llm_roundtable",
-            fresh_sn_data_fetch=args.fresh_data,
+            fresh_sn_data_fetch=False,
             fresh_llm_data_fetch=True,
             debug=True,
         )
@@ -219,14 +219,16 @@ def cli():
         if not args.obsidian_path:
             print("Error: --obsidian-path is required for the obsidian operation")
             return
-        
+
         sync_to_obsidian(
             notes_folder="notes",
             obsidian_path=args.obsidian_path,
             obsidian_folder=args.obsidian_folder,
             synced_files=synced_files,
         )
-        print(f"Notes synced to Obsidian vault at {args.obsidian_path}/{args.obsidian_folder}")
+        print(
+            f"Notes synced to Obsidian vault at {args.obsidian_path}/{args.obsidian_folder}"
+        )
     else:
         print(f"Unknown operation: {args.operation}")
         raise ValueError(f"Unknown operation: {args.operation}")
