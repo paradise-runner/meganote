@@ -6,16 +6,12 @@ from src.supernote import (
 from src.text_extraction import (
     extract_text_from_images,
 )
-from src.meta import (
-    generate_metadata,
-)
 
 
 def process_synced_files_from_supernote(
     data_folder="data",
     images_folder="images",
-    image_llm_model="gemma3:12b",
-    metadata_model="qwen2.5:3b",
+    image_llm_model="ollama/gemma3:12b",
     supernote_ip=DEFAULT_SUPERNOTE_IP,
     supernote_port=DEFAULT_SUPERNOTE_PORT,
     ignore_dirs=None,
@@ -36,10 +32,5 @@ def process_synced_files_from_supernote(
         synced_files=synced_files,
     )
 
-    generate_metadata(
-        extracted_data="notes",
-        metadata_model_id=metadata_model,
-        synced_files=synced_files,
-    )
 
     return synced_files  # Return synced files list to caller

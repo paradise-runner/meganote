@@ -10,9 +10,6 @@ from src.text_extraction import (
     test_llm_image_eval,
     extract_text_from_images,
 )
-from src.meta import (
-    generate_metadata,
-)
 from src.sync import (
     process_synced_files_from_supernote,
 )
@@ -37,7 +34,6 @@ def cli():
         choices=[
             "extract",
             "test-img",
-            "metadata",
             "sync",
             "pull",
             "note-to-png",
@@ -48,7 +44,6 @@ def cli():
         help="""Operation to perform on either one, synced files (new/updated notes) or all files. 
         \"extract\" will extract text from images,
         \"test-img\" will test the LLM image evaluation,
-        \"metadata\" will generate metadata for the synced files, 
         \"sync\" will sync the files from the supernote and generate metadata for all files,
         \"pull\" will pull the files from the supernote,
         \"note-to-png\" will convert notes to PNG format,
@@ -71,14 +66,8 @@ def cli():
     parser.add_argument(
         "--image-llm-model",
         type=str,
-        default="gemma3:12b",
+        default="ollama/gemma3:12b",
         help="LLM model for text extraction from images",
-    )
-    parser.add_argument(
-        "--metadata-model",
-        type=str,
-        default="qwen2.5:3b",
-        help="LLM model for metadata generation",
     )
     parser.add_argument(
         "--supernote-ip",
@@ -149,13 +138,6 @@ def cli():
             fresh_llm_data_fetch=True,
             debug=True,
         )
-    elif args.operation == "metadata":
-        # generate metadata for the synced files
-        generate_metadata(
-            extracted_data="notes",
-            metadata_model_id=args.metadata_model,
-            synced_files=synced_files,
-        )
     elif args.operation == "extract":
         # extract text from the pngs using the llm
         extract_text_from_images(
@@ -171,7 +153,6 @@ def cli():
             data_folder="data",
             images_folder="images",
             image_llm_model=args.image_llm_model,
-            metadata_model=args.metadata_model,
             supernote_ip=args.supernote_ip,
             supernote_port=args.supernote_port,
             ignore_dirs=ignore_dirs,
@@ -199,7 +180,6 @@ def cli():
             data_folder="data",
             images_folder="images",
             image_llm_model=args.image_llm_model,
-            metadata_model=args.metadata_model,
             supernote_ip=args.supernote_ip,
             supernote_port=args.supernote_port,
             delay_hours=args.delay_hours,

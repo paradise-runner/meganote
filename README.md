@@ -171,5 +171,5 @@ Output files will be stored in the following directories:
 | ollama/gemma3:12b | 94.46% |
 | ollama/gemma3:4b | 94.02% |
 | ollama/llama3.2-vision:11b | 4.35% |
-| openrouter/qwen/qwen2.5-vl-32b-instruct:free | 100% |
-| openrouter/qwen/qwen2.5-vl-72b-instruct:free | 61.83% |
+| openrouter/qwen/qwen2.5-vl-32b-instruct:free | 61.83% |
+| openrouter/qwen/qwen2.5-vl-72b-instruct:free | 100% |

@@ -57,6 +57,9 @@ def clean_text(text, newline_replacement=True):
 
     # strip out ```text and ``` from the text
     text = re.sub(r"^```text|```$", "", text)
+
+    # strip our any internal extra spaces
+    text = re.sub(r"\s+", " ", text)
     return text
 
 

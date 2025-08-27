@@ -148,8 +148,9 @@ def test_llm_image_eval(
     image_eval_llms = [
         # "llama3.2-vision:latest",
         # "gemma3:12b",
-        "openrouter/qwen/qwen2.5-vl-32b-instruct:free",
-        "openrouter/qwen/qwen2.5-vl-72b-instruct:free",
+        # "openrouter/qwen/qwen2.5-vl-32b-instruct:free",
+        "code/sonnet",
+        # "openrouter/qwen/qwen2.5-vl-72b-instruct:free",
     ]
 
     if fresh_llm_data_fetch:
@@ -170,7 +171,7 @@ def extract_text_from_images(
     images_folder="images",
     data_folder="data",
     output_folder="notes",
-    image_eval_llm="gemma3:latest",
+    image_eval_llm="ollama/gemma3:latest",
     synced_files=[],
 ):
     """

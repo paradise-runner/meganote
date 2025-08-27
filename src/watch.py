@@ -31,8 +31,7 @@ def is_supernote_available(
 def watch_for_supernote(
     data_folder="data",
     images_folder="images",
-    image_llm_model="gemma3:12b",
-    metadata_model="qwen2.5:3b",
+    image_llm_model="ollama/gemma3:12b",
     supernote_ip=DEFAULT_SUPERNOTE_IP,
     supernote_port=DEFAULT_SUPERNOTE_PORT,
     delay_hours=1,
@@ -84,7 +83,6 @@ def watch_for_supernote(
                         data_folder=data_folder,
                         images_folder=images_folder,
                         image_llm_model=image_llm_model,
-                        metadata_model=metadata_model,
                         supernote_ip=supernote_ip,
                         supernote_port=supernote_port,
                         ignore_dirs=ignore_dirs,

@@ -1,17 +1,8 @@
 import time
-import json
 from typing import Optional, List
-from enum import Enum
 
 import llm
 from llm.models import Attachment, Model
-
-
-class LLMModelType(Enum):
-    """Enum for different LLM model types and their purposes."""
-
-    TEXT_EXTRACTION = "text_extraction"
-    METADATA_GENERATION = "metadata_generation"
 
 
 def get_llm_model(model_id: str) -> Model:
@@ -66,7 +57,6 @@ def call_llm_with_retry(
             # Add rate limiting delay for non-ollama models
             if requires_rate_limit and attempt > 0:
                 time.sleep(30)
-
             # Make the LLM call
             if schema:
                 response = model.prompt(prompt, schema=schema)
@@ -86,12 +76,14 @@ def call_llm_with_retry(
                 continue
             else:
                 raise e
+    
+    raise Exception("LLM call failed after all retry attempts.")
 
 
 def extract_text_from_image(
     model_id: str,
     image_path: str,
-    prompt: str = "extract the handwriting and correct spelling",
+    prompt: str = "extract text from the handwriting and only return the text",
 ) -> str:
     """
     Centralized function for text extraction from images.
@@ -109,54 +101,3 @@ def extract_text_from_image(
 
     return call_llm_with_retry(model=model, prompt=prompt, attachments=attachments)
 
-
-def generate_tags_with_llm(
-    model_id: str,
-    text: str,
-    max_tags: int = 3,
-) -> List[str]:
-    """
-    Centralized function for tag generation using LLM.
-
-    Args:
-        model_id: The LLM model ID to use
-        text: The text to generate tags for
-        max_tags: Maximum number of tags to generate
-
-    Returns:
-        List[str]: List of generated tags
-    """
-    model = get_llm_model(model_id)
-    prompt = f"Given this notebook text, provide a list of tags that serve as a theme category or primary subject with a maximum of {max_tags} tags possible. text: {text}"
-    schema = llm.schema_dsl("tag,description", multi=True)
-
-    response = call_llm_with_retry(model=model, prompt=prompt, schema=schema)
-
-    resp_json = json.loads(response)
-    return [tag["tag"] for tag in resp_json["items"]]
-
-
-def generate_keywords_with_llm(
-    model_id: str,
-    text: str,
-    max_keywords: int = 7,
-) -> List[str]:
-    """
-    Centralized function for keyword generation using LLM.
-
-    Args:
-        model_id: The LLM model ID to use
-        text: The text to generate keywords for
-        max_keywords: Maximum number of keywords to generate
-
-    Returns:
-        List[str]: List of generated keywords
-    """
-    model = get_llm_model(model_id)
-    prompt = f"Given this notebook text, provide a list of keywords that work as wiki-style links and are central to the content of the text to link relevant notes together with a maximum of {max_keywords} tags possible. text: {text}"
-    schema = llm.schema_dsl("keyword,description", multi=True)
-
-    response = call_llm_with_retry(model=model, prompt=prompt, schema=schema)
-
-    resp_json = json.loads(response)
-    return [kw["keyword"] for kw in resp_json["items"]]
