@@ -32,5 +32,4 @@ def process_synced_files_from_supernote(
         synced_files=synced_files,
     )
 
-
     return synced_files  # Return synced files list to caller

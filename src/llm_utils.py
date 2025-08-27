@@ -76,7 +76,7 @@ def call_llm_with_retry(
                 continue
             else:
                 raise e
-    
+
     raise Exception("LLM call failed after all retry attempts.")
 
 
@@ -100,4 +100,3 @@ def extract_text_from_image(
     attachments = [Attachment(path=image_path)]
 
     return call_llm_with_retry(model=model, prompt=prompt, attachments=attachments)
-
