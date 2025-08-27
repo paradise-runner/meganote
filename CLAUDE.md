@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MegaNote is a Python utility that syncs handwritten notes from Supernote devices, extracts text using local LLMs (Large Language Models), and enhances the content with metadata, tags, and links. It's designed for local-first AI processing with no cloud dependencies.
+MegaNote is a Python utility that syncs handwritten notes from Supernote devices and extracts text using local LLMs (Large Language Models). It's designed for local-first AI processing with no cloud dependencies.
 
 ## Key Commands
 
@@ -17,7 +17,6 @@ MegaNote is a Python utility that syncs handwritten notes from Supernote devices
 - **Full sync workflow**: `uv run main.py --operation sync`
 - **Pull files only**: `uv run main.py --operation pull`
 - **Extract text from existing images**: `uv run main.py --operation extract`
-- **Generate metadata**: `uv run main.py --operation metadata`
 - **Watch mode**: `uv run main.py --operation watch`
 - **Convert to PNG**: `uv run main.py --operation note-to-png`
 - **Sync to Obsidian**: `uv run main.py --operation obsidian --obsidian-path /path/to/vault`
@@ -25,8 +24,7 @@ MegaNote is a Python utility that syncs handwritten notes from Supernote devices
 ### Model Configuration
 - **Default image extraction model**: `gemma3:12b` (requires ~16GB RAM/VRAM)
 - **Alternative smaller model**: `gemma3:4b` (requires ~8GB VRAM)
-- **Default metadata model**: `qwen2.5:3b`
-- **Override models**: `--image-llm-model MODEL_NAME --metadata-model MODEL_NAME`
+- **Override model**: `--image-llm-model MODEL_NAME`
 
 ## Architecture
 
@@ -34,7 +32,6 @@ MegaNote is a Python utility that syncs handwritten notes from Supernote devices
 1. **Sync**: `src/supernote.py` - Connects to Supernote device via WiFi, downloads .note files
 2. **Convert**: `src/supernote.py` - Converts .note files to PNG images using supernotelib
 3. **Extract**: `src/text_extraction.py` - Uses LLMs to extract text from PNG images
-4. **Enhance**: `src/meta.py` - Generates metadata, tags, and keywords from extracted text
 5. **Export**: `src/obsidian.py` - Syncs processed notes to Obsidian vaults
 
 ### Key Modules
